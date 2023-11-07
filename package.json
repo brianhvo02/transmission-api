@@ -1,0 +1,25 @@
+{
+    "name": "transmission-rpc-ts",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "build": "tsc",
+        "start": "node ./dist/index.js",
+        "dev": "nodemon -w src -e ts --ignore '**/*.d.ts' -x 'npm run build && npm start'"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@types/lodash": "^4.14.200",
+        "@types/node": "^20.9.0",
+        "dotenv": "^16.3.1",
+        "nodemon": "^3.0.1",
+        "typescript": "^5.2.2"
+    },
+    "dependencies": {
+        "lodash": "^4.17.21"
+    }
+}
