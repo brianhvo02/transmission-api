@@ -5,7 +5,7 @@ export default class Transmission {
     private sessionId = '';
     private rpc: string;
 
-    constructor(host: string, port: number, url: string) {
+    constructor(host: string, port: number | string, url: string) {
         this.rpc = `http://${host}:${port}${url}rpc`;
     }
 
