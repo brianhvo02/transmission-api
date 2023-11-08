@@ -1,19 +1,19 @@
 export default class Transmission {
-    sessionId = '';
-    rpc: string;
+    private sessionId = '';
+    private rpc: string;
 
     constructor(host: string, port: number, url: string) {
         this.rpc = `http://${host}:${port}${url}rpc`;
     }
 
-    getSessionId = async () => fetch(this.rpc)
+    private getSessionId = async () => fetch(this.rpc)
         .then(res => {
             const sessionId = res.headers.get('X-Transmission-Session-Id');
             if (sessionId)
                 this.sessionId = sessionId;
         });
 
-    fetch = async <T, U>(method: string, args: U, tag?: number): Promise<T> => 
+    private fetch = async <T, U>(method: string, args: U, tag?: number): Promise<T> => 
         fetch(this.rpc, {
             method: 'POST',
             headers: {
@@ -35,9 +35,9 @@ export default class Transmission {
             return res.json();
         });
 
-    async torrentAdd(filename: string, options: TorrentAddOptions): Promise<TMResponse<any>>;
-    async torrentAdd(metainfo: Buffer, options: TorrentAddOptions): Promise<TMResponse<any>>;
-    async torrentAdd(file: string | Buffer, options: TorrentAddOptions) {
+    async torrentAdd(filename: string, options?: TorrentAddOptions): Promise<TMResponse<TorrentAddResponse>>;
+    async torrentAdd(metainfo: Buffer, options?: TorrentAddOptions): Promise<TMResponse<TorrentAddResponse>>;
+    async torrentAdd(file: string | Buffer, options: TorrentAddOptions = {}) {
         const args: Partial<TorrentAddArgs> = options;
         if (typeof file === 'string')
             args.filename = file;
@@ -71,3 +71,13 @@ export interface TorrentAddArgs {
 }
 
 export type TorrentAddOptions = Partial<Omit<TorrentAddArgs, 'filename' | 'metainfo'>>;
+
+export type TorrentAddResponse = {
+    [key in 'torrent-added' | 'torrent-duplicate']?: TorrentAddResponseInfo;
+}
+
+export interface TorrentAddResponseInfo {
+    id: number;
+    name: string;
+    hashString: string;
+}
