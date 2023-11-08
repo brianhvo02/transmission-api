@@ -17,10 +17,3 @@ services:
       - 51413:51413
       - 51413:51413/udp
     restart: unless-stopped
-  # nigiri:
-  #   image: docker.io/library/nigiri
-  #   container_name: nigiri
-  #   env_file:
-  #     - .env
-  #   ports:
-  #     - 5000:5000

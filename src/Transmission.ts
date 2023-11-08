@@ -1,3 +1,6 @@
+import kebabCase from 'lodash/kebabCase.js';
+import mapKeys from 'lodash/mapKeys.js';
+
 export default class Transmission {
     private sessionId = '';
     private rpc: string;
@@ -38,14 +41,27 @@ export default class Transmission {
     async torrentAdd(filename: string, options?: TorrentAddOptions): Promise<TMResponse<TorrentAddResponse>>;
     async torrentAdd(metainfo: Buffer, options?: TorrentAddOptions): Promise<TMResponse<TorrentAddResponse>>;
     async torrentAdd(file: string | Buffer, options: TorrentAddOptions = {}) {
-        const args: Partial<TorrentAddArgs> = options;
+        const camelArgs: Partial<TorrentAddArgs> = options;
         if (typeof file === 'string')
-            args.filename = file;
+            camelArgs.filename = file;
         else
-            args.metainfo = file.toString('base64');
+            camelArgs.metainfo = file.toString('base64');
 
-        return this.fetch('torrent-add', args);
+        const kebabArgs = mapKeys(camelArgs, (_, key) => kebabCase(key));
+        const res = await this.fetch<TMResponse<TorrentAddResponseRaw>, typeof kebabArgs>('torrent-add', kebabArgs);
+        const [responseType, info] = Object.entries<TorrentAddResponseInfo>(res.arguments)[0];
+
+        return {
+            ...res,
+            arguments: {
+                responseType,
+                ...info
+            }
+        };
     }
+
+    torrentRemove = async (options: Partial<TorrentRemoveArgs> = {}) =>
+        this.fetch<TMResponse<{}>, typeof options>('torrent-remove', options);
 }
 
 export interface TMResponse<T> {
@@ -72,12 +88,21 @@ export interface TorrentAddArgs {
 
 export type TorrentAddOptions = Partial<Omit<TorrentAddArgs, 'filename' | 'metainfo'>>;
 
-export type TorrentAddResponse = {
-    [key in 'torrent-added' | 'torrent-duplicate']?: TorrentAddResponseInfo;
+export interface TorrentAddResponse extends TorrentAddResponseInfo {
+    responseType: 'torrent-added' | 'torrent-duplicate';
+}
+
+export type TorrentAddResponseRaw = {
+    [key in 'torrent-added' | 'torrent-duplicate']?: TorrentAddResponseInfo
 }
 
 export interface TorrentAddResponseInfo {
     id: number;
     name: string;
     hashString: string;
+}
+
+export interface TorrentRemoveArgs {
+    ids: number | number[];
+    deleteLocalData: boolean;
 }
