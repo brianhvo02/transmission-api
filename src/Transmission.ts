@@ -123,7 +123,9 @@ export interface TorrentGetArgs {
 
 export type TorrentGetOptions = Partial<Omit<TorrentGetArgs, 'fields'>>;
 
-export type TorrentGetResponse<T extends TorrentInfoKeys> = Pick<TorrentInfo, T>[];
+export interface TorrentGetResponse<T extends TorrentInfoKeys> {
+    torrents: Pick<TorrentInfo, T>[];
+};
 
 export type TorrentInfoKeys = keyof TorrentInfo;
 export interface TorrentInfo {
